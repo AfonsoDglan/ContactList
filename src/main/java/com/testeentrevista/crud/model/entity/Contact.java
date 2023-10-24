@@ -10,6 +10,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 @Entity
@@ -28,4 +29,5 @@ public class Contact {
     private String telephone;
     @NotNull
     private LocalDate dateBirth;
+    private String image;
 }
