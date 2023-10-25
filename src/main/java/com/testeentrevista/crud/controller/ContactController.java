@@ -57,7 +57,7 @@ public class ContactController {
         }
     }
 
-    @GetMapping("/image/{imageFileName:.+}")
+    @GetMapping("/uploads/{imageFileName:.+}")
     public ResponseEntity<Resource> serveImage(@PathVariable String imageFileName) {
         String uploadDir = "uploads/";
 
@@ -76,11 +76,34 @@ public class ContactController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    @PatchMapping("/update")
-    public ResponseEntity<?> upade(@Valid @RequestBody Contact contact)
-    {
-        return new ResponseEntity<Contact>(contactService.update(contact), HttpStatus.OK);
+
+
+    @PutMapping(value = "/update")
+    public ResponseEntity<?> update(@Valid @ModelAttribute Contact contact, @RequestParam(value = "file", required = false) MultipartFile file) {
+        try {
+            if (file != null && !file.isEmpty()) {
+                String fileName = file.getOriginalFilename();
+                String uploadDir = "uploads/";
+                String filePath = Paths.get(uploadDir, fileName).toString();
+                String absolutePath = new File("").getAbsolutePath();
+                File uploadPath = new File(absolutePath + "/" + uploadDir);
+                if (!uploadPath.exists()) {
+                    uploadPath.mkdirs();
+                }
+
+                Path path = Paths.get(uploadPath.getAbsolutePath() + File.separator + fileName);
+                Files.write(path, file.getBytes());
+                contact.setImage(uploadDir + fileName);
+            }
+
+            return new ResponseEntity<Contact>(contactService.update(contact), HttpStatus.OK);
+        } catch (IOException e) {
+            // Handle upload errors
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
+
+
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody Contact contact)
